@@ -7,22 +7,23 @@ import time, datetime
 # record the processing time
 start_time = time.time()
 # Create connection
-con = pyodbc.connect(driver="{SQL Server}",server="localhost",database="dbname",uid="root",pwd="12345678")
+con = pyodbc.connect(driver="{SQL Server}",server="localhost",database="dename",uid="root",pwd="12346578")
 cur = con.cursor()
 db_cmd = "SELECT TOP (1000) LeafName,Content,DirName FROM dbo.Docs"
 cur.execute(db_cmd)
 
 def downloadImage(row):
 	# Create dir by the 'DirName' in the table
-	CurrentDir = os.getcwd()
-	SaveDirectory = os.path.join(CurrentDir, "TEST")
-	dirname = row.DirName.replace("/", "\\")
-	BASE_DIR = os.path.join(SaveDirectory, dirname)
+	BASE_DIR = os.path.abspath(os.path.join(os.getcwd(), "TEST"))
+	print('Object loc: {}'.format(BASE_DIR))
+	for dirName in row.DirName.split("/"):
+		BASE_DIR = os.path.abspath(os.path.join(BASE_DIR, dirName))
+	print('BASE_DIR: {}'.format(BASE_DIR))
 	if not os.path.isdir(BASE_DIR):
 		os.makedirs(BASE_DIR)
 	# Write image(binary) into the file and save it in the 'DirName'
-	file = os.path.join(BASE_DIR, row.LeafName)
-	file = file.replace("\\", "\\\\")
+	file = os.path.abspath(os.path.join(BASE_DIR, row.LeafName))
+	print('file: {}'.format(file))
 	with open(file, 'wb') as f:
 		if row.Content:
 			f.write(row.Content)
